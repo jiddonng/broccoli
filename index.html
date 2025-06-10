@@ -17,8 +17,9 @@
             font-family: 'Gothic A1', sans-serif;
             background: #27633e;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
             transition: all 0.5s ease;
+            font-size: 14px;
         }
 
         .container {
@@ -34,7 +35,7 @@
             background:#93c393;
             color: white;
             text-align: center;
-            padding: 40px 20px;
+            padding: 25px 15px;
             position: relative;
             overflow: hidden;
         }
@@ -42,9 +43,9 @@
         .header::before {
             content: '🥦';
             position: absolute;
-            top: -20px;
-            left: -20px;
-            font-size: 8rem;
+            top: -15px;
+            left: -15px;
+            font-size: 5rem;
             opacity: 0.1;
             transform: rotate(-15deg);
         }
@@ -52,50 +53,51 @@
         .header::after {
             content: '🥦';
             position: absolute;
-            bottom: -30px;
-            right: -30px;
-            font-size: 10rem;
+            bottom: -20px;
+            right: -20px;
+            font-size: 6rem;
             opacity: 0.1;
             transform: rotate(25deg);
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             position: relative;
             z-index: 1;
         }
 
         .header p {
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             opacity: 0.9;
             position: relative;
             z-index: 1;
+            line-height: 1.5;
         }
 
         .form-section {
-            padding: 40px;
+            padding: 25px 20px;
         }
 
         .form-group {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: bold;
             color: #333;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
         }
 
         input[type="text"], input[type="email"], textarea {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             border: 2px solid #ddd;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 0.9rem;
             transition: border-color 0.3s ease;
         }
 
@@ -107,7 +109,7 @@
 
         textarea {
             resize: vertical;
-            min-height: 120px;
+            min-height: 100px;
         }
 
         .file-upload {
@@ -127,21 +129,22 @@
 
         .file-upload-label {
             display: block;
-            padding: 30px;
+            padding: 20px;
             border: 3px dashed #276215;
             border-radius: 10px;
             text-align: center;
             background: linear-gradient(135deg, #f3fad7 0%, #dcffe3 100%);
             transition: all 0.3s ease;
             position: relative;
+            font-size: 0.85rem;
         }
 
         .file-upload-label::before {
             content: '🥦';
             position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 1.5rem;
+            top: 8px;
+            right: 12px;
+            font-size: 1.2rem;
             opacity: 0.3;
         }
 
@@ -150,21 +153,24 @@
             border-color: #89f63b;
         }
 
-        .file-upload-label i {
-            font-size: 3rem;
-            color: #55a3ff;
-            margin-bottom: 10px;
+        .file-upload-label span {
+            font-size: 2rem;
             display: block;
+            margin-bottom: 8px;
+        }
+
+        .file-upload-label small {
+            font-size: 0.75rem;
         }
 
         .preview-container {
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: center;
         }
 
         .preview-image {
-            max-width: 300px;
-            max-height: 300px;
+            max-width: 250px;
+            max-height: 250px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
@@ -172,15 +178,15 @@
         .submit-btn {
             background: linear-gradient(45deg, #b0eda4, #43ab5d);
             color: white;
-            padding: 15px 40px;
+            padding: 12px 30px;
             border: none;
             border-radius: 25px;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
             display: block;
-            margin: 30px auto 0;
+            margin: 25px auto 0;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
@@ -191,14 +197,14 @@
 
         .admin-btn {
             position: fixed;
-            top: 30px;
-            right: 30px;
+            top: 15px;
+            right: 15px;
             color: rgb(36, 36, 36);
-            padding: 10px 20px;
+            padding: 8px 15px;
             border: none;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             z-index: 1000;
             box-shadow: 0 3px 10px rgba(47, 47, 47, 0.3);
         }
@@ -225,46 +231,48 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
-            padding: 30px;
+            padding: 20px;
             border-radius: 15px;
-            max-width: 90%;
-            max-height: 80%;
+            max-width: 95%;
+            max-height: 90%;
             overflow-y: auto;
             width: 800px;
         }
 
         .close-btn {
             position: absolute;
-            top: 15px;
-            right: 20px;
+            top: 10px;
+            right: 15px;
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             cursor: pointer;
         }
 
         .submission-item {
             border: 1px solid #ddd;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
             background: #f9f9f9;
+            font-size: 0.85rem;
         }
 
         .submission-image {
-            max-width: 200px;
-            max-height: 200px;
+            max-width: 150px;
+            max-height: 150px;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .success-message {
             background: #d4edda;
             color: #155724;
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: none;
+            font-size: 0.9rem;
         }
 
         /* 감사 페이지 스타일 */
@@ -283,12 +291,12 @@
 
         .thank-you-content {
             text-align: center;
-            padding: 60px 40px;
+            padding: 40px 20px;
         }
 
         .thank-you-emoji {
-            font-size: 5rem;
-            margin-bottom: 30px;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
             animation: bounce 2s infinite;
         }
 
@@ -305,30 +313,30 @@
         }
 
         .thank-you-title {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             color: #43ab5d;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: bold;
         }
 
         .thank-you-message {
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #666;
             line-height: 1.6;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .back-btn {
             background: linear-gradient(45deg, #93c393, #43ab5d);
             color: white;
-            padding: 15px 30px;
+            padding: 12px 25px;
             border: none;
             border-radius: 25px;
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin: 10px;
+            margin: 8px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
@@ -349,7 +357,7 @@
 
         /* 내보내기 버튼 스타일 */
         .export-buttons {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
         }
 
@@ -357,11 +365,11 @@
             background: linear-gradient(45deg, #28a745, #20c997);
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 8px 15px;
             border-radius: 8px;
             cursor: pointer;
-            margin: 0 5px;
-            font-size: 0.9rem;
+            margin: 2px;
+            font-size: 0.75rem;
             font-weight: bold;
             transition: all 0.3s ease;
             box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
@@ -382,26 +390,17 @@
 
         /* 선택 기능 스타일 */
         .select-all-container {
-            margin-bottom: 15px;
-            padding: 15px;
+            margin-bottom: 12px;
+            padding: 12px;
             background: #f8f9fa;
             border-radius: 8px;
             border: 1px solid #e9ecef;
+            font-size: 0.85rem;
         }
 
         .submission-checkbox {
-            margin-right: 10px;
-            transform: scale(1.2);
-        }
-
-        .submission-item {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            background: #f9f9f9;
-            position: relative;
-            transition: all 0.3s ease;
+            margin-right: 8px;
+            transform: scale(1.1);
         }
 
         .submission-item.selected {
@@ -412,27 +411,174 @@
 
         .submission-number {
             position: absolute;
-            top: 10px;
-            left: 15px;
+            top: 8px;
+            left: 12px;
             background: #93c393;
             color: white;
-            width: 30px;
-            height: 30px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
         }
 
         .submission-content {
-            margin-left: 45px;
+            margin-left: 35px;
+        }
+
+        .submission-content h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .submission-content p {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
         }
 
         .selected-count {
             color: #28a745;
             font-weight: bold;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+                font-size: 13px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 20px 12px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header p {
+                font-size: 0.8rem;
+                line-height: 1.4;
+            }
+
+            .form-section {
+                padding: 20px 15px;
+            }
+
+            input[type="text"], textarea {
+                padding: 10px;
+                font-size: 0.85rem;
+            }
+
+            .file-upload-label {
+                padding: 15px;
+                font-size: 0.8rem;
+            }
+
+            .file-upload-label span {
+                font-size: 1.8rem;
+            }
+
+            .preview-image {
+                max-width: 200px;
+                max-height: 200px;
+            }
+
+            .submit-btn {
+                padding: 10px 25px;
+                font-size: 0.9rem;
+            }
+
+            .thank-you-emoji {
+                font-size: 3rem;
+            }
+
+            .thank-you-title {
+                font-size: 1.5rem;
+            }
+
+            .thank-you-message {
+                font-size: 0.9rem;
+            }
+
+            .back-btn {
+                padding: 10px 20px;
+                font-size: 0.85rem;
+                margin: 5px;
+            }
+
+            .admin-content {
+                padding: 15px;
+                max-width: 98%;
+                max-height: 95%;
+            }
+
+            .submission-item {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+
+            .submission-image {
+                max-width: 120px;
+                max-height: 120px;
+            }
+
+            .export-btn {
+                padding: 6px 12px;
+                font-size: 0.7rem;
+                margin: 1px;
+            }
+
+            .select-all-container {
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+
+            .admin-btn {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header p {
+                font-size: 0.75rem;
+            }
+
+            .form-section {
+                padding: 15px 12px;
+            }
+
+            .thank-you-content {
+                padding: 30px 15px;
+            }
+
+            .admin-content {
+                padding: 12px;
+            }
+
+            .export-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 3px;
+            }
+
+            .export-btn {
+                flex: 1;
+                min-width: 80px;
+                font-size: 0.65rem;
+                padding: 5px 8px;
+            }
         }
     </style>
 </head>
@@ -475,7 +621,7 @@
                         <div class="file-upload">
                             <input type="file" id="photo" accept="image/*" required>
                             <label for="photo" class="file-upload-label">
-                                <span style="font-size: 3rem;">📷</span>
+                                <span>📷</span>
                                 <div>클릭해서 내 꿈을 나타낼 수 있는 사진을 선택하세요.</div>
                                 <small>(JPG, PNG, GIF 등 이미지 파일)</small>
                             </label>
@@ -528,9 +674,9 @@
             <button class="close-btn" onclick="hideAdmin()">×</button>
             <h2>업로드된 사진들</h2>
             <div class="export-buttons">
-                <button onclick="exportToExcel()" class="export-btn">📊 전체 엑셀 다운로드</button>
-                <button onclick="exportToCSV()" class="export-btn csv-btn">📄 전체 CSV 다운로드</button>
-                <button onclick="exportImages()" class="export-btn" style="background: linear-gradient(45deg, #fd79a8, #e84393);">🖼️ 전체 이미지 다운로드</button>
+                <button onclick="exportToExcel()" class="export-btn">📊 전체 엑셀</button>
+                <button onclick="exportToCSV()" class="export-btn csv-btn">📄 전체 CSV</button>
+                <button onclick="exportImages()" class="export-btn" style="background: linear-gradient(45deg, #fd79a8, #e84393);">🖼️ 전체 이미지</button>
             </div>
             <div class="select-all-container">
                 <label>
@@ -538,10 +684,10 @@
                     전체 선택/해제
                 </label>
                 <span id="selectedCount" class="selected-count">(0개 선택됨)</span>
-                <div style="margin-top: 10px;">
-                    <button onclick="exportSelectedToExcel()" class="export-btn" style="background: linear-gradient(45deg, #ffa726, #ff7043); font-size: 0.8rem; padding: 8px 15px;">📊 선택항목 엑셀</button>
-                    <button onclick="exportSelectedToCSV()" class="export-btn csv-btn" style="font-size: 0.8rem; padding: 8px 15px;">📄 선택항목 CSV</button>
-                    <button onclick="exportSelectedImages()" class="export-btn" style="background: linear-gradient(45deg, #ab47bc, #8e24aa); font-size: 0.8rem; padding: 8px 15px;">🖼️ 선택항목 이미지</button>
+                <div style="margin-top: 8px;">
+                    <button onclick="exportSelectedToExcel()" class="export-btn" style="background: linear-gradient(45deg, #ffa726, #ff7043);">📊 선택 엑셀</button>
+                    <button onclick="exportSelectedToCSV()" class="export-btn csv-btn">📄 선택 CSV</button>
+                    <button onclick="exportSelectedImages()" class="export-btn" style="background: linear-gradient(45deg, #ab47bc, #8e24aa);">🖼️ 선택 이미지</button>
                 </div>
             </div>
             <div id="submissionsList"></div>
@@ -660,7 +806,7 @@
                 html += `
                     <div class="submission-item" id="item-${submission.id}">
                         <div class="submission-number">${displayIndex}</div>
-                        <label style="position: absolute; top: 15px; right: 60px;">
+                        <label style="position: absolute; top: 12px; right: 45px;">
                             <input type="checkbox" class="submission-checkbox item-checkbox" 
                                    value="${submission.id}" onchange="updateSelectedCount()">
                         </label>
@@ -668,12 +814,12 @@
                             <h3>🥦 ${submission.name}</h3>
                             <p><strong>업로드 시간:</strong> ${submission.timestamp}</p>
                             ${submission.category ? `<p><strong>카테고리:</strong> ${submission.category}</p>` : ''}
-                            <div style="margin: 15px 0;">
+                            <div style="margin: 10px 0;">
                                 <img src="${submission.photo}" alt="업로드된 사진" class="submission-image">
                             </div>
                             <p><strong>설명:</strong></p>
-                            <p style="background: white; padding: 10px; border-radius: 5px; margin-top: 5px;">${submission.description}</p>
-                            <button onclick="deleteSubmission(${submission.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px;">삭제</button>
+                            <p style="background: white; padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 0.8rem;">${submission.description}</p>
+                            <button onclick="deleteSubmission(${submission.id})" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; margin-top: 8px; font-size: 0.75rem;">삭제</button>
                         </div>
                     </div>
                 `;
@@ -720,231 +866,4 @@
             const allCheckboxes = document.querySelectorAll('.item-checkbox');
             const selectAllCheckbox = document.getElementById('selectAll');
             
-            if (count === 0) {
-                selectAllCheckbox.indeterminate = false;
-                selectAllCheckbox.checked = false;
-            } else if (count === allCheckboxes.length) {
-                selectAllCheckbox.indeterminate = false;
-                selectAllCheckbox.checked = true;
-            } else {
-                selectAllCheckbox.indeterminate = true;
-            }
-            
-            // 선택된 항목 스타일 업데이트
-            allCheckboxes.forEach(checkbox => {
-                const item = document.getElementById(`item-${checkbox.value}`);
-                if (checkbox.checked) {
-                    item.classList.add('selected');
-                } else {
-                    item.classList.remove('selected');
-                }
-            });
-        }
-
-        function getSelectedSubmissions() {
-            const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked'))
-                .map(checkbox => parseInt(checkbox.value));
-            
-            return submissions.filter(submission => selectedIds.includes(submission.id));
-        }
-
-        // 선택된 항목 엑셀 내보내기
-        function exportSelectedToExcel() {
-            const selectedSubmissions = getSelectedSubmissions();
-            
-            if (selectedSubmissions.length === 0) {
-                alert('선택된 항목이 없습니다.');
-                return;
-            }
-
-            const exportData = selectedSubmissions.map((submission, index) => ({
-                '번호': index + 1,
-                '이름': submission.name,
-                '업로드시간': submission.timestamp,
-                '카테고리': submission.category || '',
-                '설명': submission.description,
-                '이미지포함여부': '포함됨'
-            }));
-
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, '선택된 꿈들');
-
-            worksheet['!cols'] = [
-                { width: 8 },  // 번호
-                { width: 15 }, // 이름
-                { width: 20 }, // 업로드시간
-                { width: 15 }, // 카테고리
-                { width: 50 }, // 설명
-                { width: 15 }  // 이미지포함여부
-            ];
-
-            const fileName = `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.xlsx`;
-            XLSX.writeFile(workbook, fileName);
-            
-            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 엑셀 파일로 다운로드되었습니다!`);
-        }
-
-        // 선택된 항목 CSV 내보내기
-        function exportSelectedToCSV() {
-            const selectedSubmissions = getSelectedSubmissions();
-            
-            if (selectedSubmissions.length === 0) {
-                alert('선택된 항목이 없습니다.');
-                return;
-            }
-
-            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
-            const csvContent = [
-                headers.join(','),
-                ...selectedSubmissions.map((submission, index) => [
-                    index + 1,
-                    `"${submission.name}"`,
-                    `"${submission.timestamp}"`,
-                    `"${submission.category || ''}"`,
-                    `"${submission.description.replace(/"/g, '""')}"`
-                ].join(','))
-            ].join('\n');
-
-            const bom = '\uFEFF';
-            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
-        }
-
-        // 선택된 항목 이미지 다운로드
-        function exportSelectedImages() {
-            const selectedSubmissions = getSelectedSubmissions();
-            
-            if (selectedSubmissions.length === 0) {
-                alert('선택된 항목이 없습니다.');
-                return;
-            }
-
-            selectedSubmissions.forEach((submission, index) => {
-                const link = document.createElement('a');
-                link.href = submission.photo;
-                link.download = `${submission.name}_${index + 1}.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                if (index < selectedSubmissions.length - 1) {
-                    setTimeout(() => {}, 100);
-                }
-            });
-            
-            alert(`선택된 ${selectedSubmissions.length}개의 이미지 다운로드를 시작했습니다!`);
-        }
-
-        // 기존 전체 내보내기 함수들 수정
-        function exportToExcel() {
-            if (submissions.length === 0) {
-                alert('내보낼 데이터가 없습니다.');
-                return;
-            }
-
-            const exportData = submissions.map((submission, index) => ({
-                '번호': index + 1,
-                '이름': submission.name,
-                '업로드시간': submission.timestamp,
-                '카테고리': submission.category || '',
-                '설명': submission.description,
-                '이미지포함여부': '포함됨'
-            }));
-
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, '브로콜리의 꿈');
-
-            worksheet['!cols'] = [
-                { width: 8 },  // 번호
-                { width: 15 }, // 이름
-                { width: 20 }, // 업로드시간
-                { width: 15 }, // 카테고리
-                { width: 50 }, // 설명
-                { width: 15 }  // 이미지포함여부
-            ];
-
-            const fileName = `브로콜리의꿈_전체_${new Date().toISOString().slice(0, 10)}.xlsx`;
-            XLSX.writeFile(workbook, fileName);
-            
-            alert(`전체 ${submissions.length}건의 데이터가 엑셀 파일로 다운로드되었습니다!`);
-        }
-
-        // CSV 내보내기
-        function exportToCSV() {
-            if (submissions.length === 0) {
-                alert('내보낼 데이터가 없습니다.');
-                return;
-            }
-
-            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
-            const csvContent = [
-                headers.join(','),
-                ...submissions.map((submission, index) => [
-                    index + 1,
-                    `"${submission.name}"`,
-                    `"${submission.timestamp}"`,
-                    `"${submission.category || ''}"`,
-                    `"${submission.description.replace(/"/g, '""')}"`
-                ].join(','))
-            ].join('\n');
-
-            const bom = '\uFEFF';
-            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `브로콜리의꿈_전체_${new Date().toISOString().slice(0, 10)}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert(`전체 ${submissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
-        }
-
-        // 이미지 다운로드
-        function exportImages() {
-            if (submissions.length === 0) {
-                alert('다운로드할 이미지가 없습니다.');
-                return;
-            }
-
-            submissions.forEach((submission, index) => {
-                const link = document.createElement('a');
-                link.href = submission.photo;
-                link.download = `${submission.name}_${index + 1}.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // 브라우저가 동시 다운로드를 제한할 수 있으므로 약간의 지연
-                if (index < submissions.length - 1) {
-                    setTimeout(() => {}, 100);
-                }
-            });
-            
-            alert(`${submissions.length}개의 이미지 다운로드를 시작했습니다!`);
-        }
-
-        // ESC 키로 관리자 패널 닫기
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                hideAdmin();
-            }
-        });
-    </script>
-</body>
-</html>
+            if
