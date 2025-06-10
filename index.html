@@ -7,9 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <!-- Firebase SDK (정확한 버전) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -602,8 +602,7 @@
                     <br>
                     사진은 꿈과 직접적인 연관이 없어도 됩니다.<br>
                     여러분만의 이야기를 들려 주세요. <br>
-                    혹시 여러 가지 꿈을 가지고 계시다면,,~ <br>
-                    여러 번 작성해 주셔도 완전 됩니다!<br>
+                    혹시 여러 가지 꿈을 가지고 계시다면,,~ 여러 번 작성해 주셔도 완전 됩니다!<br>
                     <br>
                     작은 조각들을 모아 어떤 이야기가 만들어질지 계속 지켜봐 주세요!
                     </p>
@@ -699,68 +698,91 @@
     </div>
 
     <script>
-        // Firebase 설정 (여기에 본인의 Firebase 설정을 넣으세요)
+        // Firebase 설정 확인용 (실제 값으로 교체 필요)
         const firebaseConfig = {
-            apiKey: "AIzaSyBtTKxuvAB1M916VVXu3loXbCUYGRslWA4",
-    authDomain: "dream-of-broccoli.firebaseapp.com",
-    projectId: "dream-of-broccoli",
-    storageBucket: "dream-of-broccoli.firebasestorage.app",
-    messagingSenderId: "199889319795",
-    appId: "1:199889319795:web:854cb8634a7107bd597706",
-    measurementId: "G-WDPKJHP8JR"
-  };
+            apiKey: "YOUR_API_KEY",
+            authDomain: "dream-of-broccoli.firebaseapp.com", 
+            projectId: "dream-of-broccoli",
+            storageBucket: "dream-of-broccoli.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-        // Firebase 초기화
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
+        let db;
         let submissions = [];
+
+        // Firebase 초기화 및 오류 처리
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log('Firebase 연결 성공!');
+        } catch (error) {
+            console.error('Firebase 연결 오류:', error);
+            // Firebase 연결 실패 시 로컬 스토리지 사용
+            submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+        }
 
         // Firestore에서 데이터 불러오기
         async function loadSubmissions() {
+            if (!db) {
+                console.log('Firebase 미연결 - 로컬 데이터 사용');
+                submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+                return;
+            }
+
             try {
                 const querySnapshot = await db.collection('submissions').orderBy('timestamp', 'desc').get();
                 submissions = [];
                 querySnapshot.forEach((doc) => {
                     submissions.push({ id: doc.id, ...doc.data() });
                 });
-                console.log('데이터 로드 완료:', submissions.length, '개');
+                console.log('Firestore에서 데이터 로드:', submissions.length, '개');
             } catch (error) {
-                console.error('데이터 로드 오류:', error);
-                // 로컬 스토리지 백업 사용
+                console.error('Firestore 데이터 로드 오류:', error);
+                // 백업으로 로컬 스토리지 사용
                 submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+                console.log('로컬 스토리지 백업 사용:', submissions.length, '개');
             }
         }
 
         // Firestore에 데이터 저장
         async function saveSubmission(data) {
-            try {
-                const docRef = await db.collection('submissions').add(data);
-                console.log('데이터 저장 완료:', docRef.id);
-                
-                // 로컬 스토리지 백업도 저장
-                submissions.push({ id: docRef.id, ...data });
-                localStorage.setItem('submissions', JSON.stringify(submissions));
-                
-                return docRef.id;
-            } catch (error) {
-                console.error('데이터 저장 오류:', error);
-                // 실패 시 로컬 스토리지만 사용
-                const localId = Date.now().toString();
-                const submissionWithId = { id: localId, ...data };
-                submissions.push(submissionWithId);
-                localStorage.setItem('submissions', JSON.stringify(submissions));
-                return localId;
+            // 로컬 스토리지에 먼저 저장 (백업)
+            const localData = { id: Date.now().toString(), ...data };
+            submissions.push(localData);
+            localStorage.setItem('submissions', JSON.stringify(submissions));
+            console.log('로컬 스토리지에 저장 완료');
+
+            // Firebase에도 저장 시도
+            if (db) {
+                try {
+                    const docRef = await db.collection('submissions').add(data);
+                    console.log('Firestore 저장 성공:', docRef.id);
+                    
+                    // 로컬 데이터의 ID 업데이트
+                    const lastIndex = submissions.length - 1;
+                    submissions[lastIndex].id = docRef.id;
+                    localStorage.setItem('submissions', JSON.stringify(submissions));
+                    
+                    return docRef.id;
+                } catch (error) {
+                    console.error('Firestore 저장 오류:', error);
+                    console.log('로컬 스토리지만 사용하여 계속 진행');
+                }
             }
+            
+            return localData.id;
         }
 
         // Firestore에서 데이터 삭제
         async function deleteSubmissionFromFirestore(id) {
-            try {
-                await db.collection('submissions').doc(id).delete();
-                console.log('데이터 삭제 완료:', id);
-            } catch (error) {
-                console.error('데이터 삭제 오류:', error);
+            if (db) {
+                try {
+                    await db.collection('submissions').doc(id).delete();
+                    console.log('Firestore 삭제 완료:', id);
+                } catch (error) {
+                    console.error('Firestore 삭제 오류:', error);
+                }
             }
         }
 
@@ -786,6 +808,7 @@
         // 폼 제출
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            console.log('폼 제출 시작');
             
             const formData = {
                 name: document.getElementById('name').value,
@@ -796,17 +819,23 @@
 
             const photoFile = document.getElementById('photo').files[0];
             if (photoFile) {
+                console.log('이미지 처리 시작');
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     formData.photo = e.target.result;
+                    console.log('이미지 인코딩 완료');
                     
-                    // Firestore에 저장
+                    // 데이터 저장
                     await saveSubmission(formData);
+                    console.log('저장 완료, 감사 페이지로 이동');
                     
                     // 감사 페이지로 전환
                     showThankYouPage();
                 };
                 reader.readAsDataURL(photoFile);
+            } else {
+                console.error('사진이 선택되지 않았습니다');
+                alert('사진을 선택해주세요!');
             }
         });
 
@@ -941,7 +970,7 @@
             const allCheckboxes = document.querySelectorAll('.item-checkbox');
             const selectAllCheckbox = document.getElementById('selectAll');
             
-             if (count === 0) {
+            if (count === 0) {
                 selectAllCheckbox.indeterminate = false;
                 selectAllCheckbox.checked = false;
             } else if (count === allCheckboxes.length) {
