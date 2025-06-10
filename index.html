@@ -199,6 +199,17 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
 
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn:disabled:hover {
+            transform: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
         .admin-btn {
             position: fixed;
             top: 15px;
@@ -260,6 +271,7 @@
             margin-bottom: 15px;
             background: #f9f9f9;
             font-size: 0.85rem;
+            position: relative;
         }
 
         .submission-image {
@@ -644,7 +656,7 @@
                         <input type="text" id="category" placeholder="예: 여행, 일상, 사랑, 장래희망, 취미 등">
                     </div>
 
-                    <button type="submit" class="submit-btn">꿈 나누기</button>
+                    <button type="submit" class="submit-btn" id="submitBtn">꿈 나누기</button>
                 </form>
             </div>
         </div>
@@ -699,7 +711,7 @@
     </div>
 
     <script>
-        // Firebase 설정 확인용 (실제 값으로 교체 필요)
+        // Firebase 설정 (실제 값으로 교체 필요)
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "dream-of-broccoli.firebaseapp.com", 
@@ -746,15 +758,21 @@
             }
         }
 
-        // Firestore에 데이터 저장
+        // Firestore에 데이터 저장 (향상된 오류 처리)
         async function saveSubmission(data) {
             // 로컬 스토리지에 먼저 저장 (백업)
             const localData = { id: Date.now().toString(), ...data };
-            submissions.push(localData);
-            localStorage.setItem('submissions', JSON.stringify(submissions));
-            console.log('로컬 스토리지에 저장 완료');
+            
+            try {
+                submissions.push(localData);
+                localStorage.setItem('submissions', JSON.stringify(submissions));
+                console.log('로컬 스토리지 백업 저장 완료');
+            } catch (localError) {
+                console.error('로컬 스토리지 저장 실패:', localError);
+                throw new Error('로컬 저장에 실패했습니다. 브라우저 저장 공간을 확인해주세요.');
+            }
 
-            // Firebase에도 저장 시도
+            // Firebase에 저장 시도
             if (db) {
                 try {
                     const docRef = await db.collection('submissions').add(data);
@@ -766,13 +784,89 @@
                     localStorage.setItem('submissions', JSON.stringify(submissions));
                     
                     return docRef.id;
-                } catch (error) {
-                    console.error('Firestore 저장 오류:', error);
-                    console.log('로컬 스토리지만 사용하여 계속 진행');
+                } catch (firebaseError) {
+                    console.error('Firestore 저장 오류:', firebaseError);
+                    console.log('Firebase 오류, 로컬 저장으로 계속 진행');
                 }
+            } else {
+                console.log('Firebase 미연결 - 로컬 스토리지만 사용');
             }
             
             return localData.id;
+        }
+
+        // 이미지 처리 함수 (압축 및 리사이징)
+        function processImage(file) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    // 최대 크기 설정 (1200px)
+                    const maxSize = 1200;
+                    let { width, height } = img;
+                    
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) {
+                            height = (height * maxSize) / width;
+                            width = maxSize;
+                        } else {
+                            width = (width * maxSize) / height;
+                            height = maxSize;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // 이미지 그리기
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 압축된 이미지 데이터 반환 (품질 0.8)
+                    const compressedData = canvas.toDataURL('image/jpeg', 0.8);
+                    resolve(compressedData);
+                };
+                
+                img.onerror = function() {
+                    reject(new Error('이미지 처리 중 오류가 발생했습니다.'));
+                };
+                
+                // 파일을 이미지로 로드
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                };
+                reader.onerror = function() {
+                    reject(new Error('파일을 읽을 수 없습니다.'));
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 재시도 로직이 포함된 저장 함수
+        async function saveSubmissionWithRetry(data, maxRetries = 3) {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`저장 시도 ${attempt}/${maxRetries}`);
+                    return await saveSubmission(data);
+                } catch (error) {
+                    console.warn(`저장 시도 ${attempt} 실패:`, error);
+                    
+                    if (attempt === maxRetries) {
+                        // 최종 실패 시 로컬 스토리지에만 저장
+                        console.log('모든 시도 실패, 로컬 스토리지에만 저장');
+                        const localId = Date.now().toString();
+                        const submissionWithId = { id: localId, ...data };
+                        submissions.push(submissionWithId);
+                        localStorage.setItem('submissions', JSON.stringify(submissions));
+                        return localId;
+                    }
+                    
+                    // 재시도 전 대기 (1초, 2초, 3초)
+                    await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+                }
+            }
         }
 
         // Firestore에서 데이터 삭제
@@ -806,37 +900,72 @@
             }
         });
 
-        // 폼 제출
+        // 폼 제출 - 완전히 새로 작성된 안정적인 버전
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             console.log('폼 제출 시작');
             
-            const formData = {
-                name: document.getElementById('name').value,
-                description: document.getElementById('description').value,
-                category: document.getElementById('category').value,
-                timestamp: new Date().toISOString()
-            };
+            // 제출 버튼 비활성화 (중복 제출 방지)
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '업로드 중...';
+            submitBtn.style.opacity = '0.6';
+            
+            try {
+                // 폼 데이터 수집
+                const name = document.getElementById('name').value.trim();
+                const description = document.getElementById('description').value.trim();
+                const category = document.getElementById('category').value.trim();
+                const photoFile = document.getElementById('photo').files[0];
 
-            const photoFile = document.getElementById('photo').files[0];
-            if (photoFile) {
-                console.log('이미지 처리 시작');
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    formData.photo = e.target.result;
-                    console.log('이미지 인코딩 완료');
-                    
-                    // 데이터 저장
-                    await saveSubmission(formData);
-                    console.log('저장 완료, 감사 페이지로 이동');
-                    
-                    // 감사 페이지로 전환
-                    showThankYouPage();
+                // 필수 필드 검증
+                if (!name) {
+                    throw new Error('이름을 입력해주세요.');
+                }
+                if (!description) {
+                    throw new Error('설명을 입력해주세요.');
+                }
+                if (!photoFile) {
+                    throw new Error('사진을 선택해주세요.');
+                }
+
+                // 파일 크기 검증 (5MB 제한)
+                if (photoFile.size > 5 * 1024 * 1024) {
+                    throw new Error('파일 크기가 5MB를 초과합니다. 더 작은 파일을 선택해주세요.');
+                }
+
+                console.log('이미지 처리 시작, 파일 크기:', (photoFile.size / 1024 / 1024).toFixed(2), 'MB');
+                
+                // 이미지 처리 및 압축
+                const processedImage = await processImage(photoFile);
+                
+                // 최종 데이터 객체 생성
+                const formData = {
+                    name: name,
+                    description: description,
+                    category: category,
+                    photo: processedImage,
+                    timestamp: new Date().toISOString()
                 };
-                reader.readAsDataURL(photoFile);
-            } else {
-                console.error('사진이 선택되지 않았습니다');
-                alert('사진을 선택해주세요!');
+                
+                console.log('이미지 처리 완료, 데이터 저장 시작');
+                
+                // 데이터 저장 (재시도 로직 포함)
+                await saveSubmissionWithRetry(formData);
+                console.log('저장 완료, 감사 페이지로 이동');
+                
+                // 감사 페이지로 전환
+                showThankYouPage();
+                
+            } catch (error) {
+                console.error('폼 제출 오류:', error);
+                alert(`오류가 발생했습니다: ${error.message}`);
+                
+                // 버튼 복구
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                submitBtn.style.opacity = '1';
             }
         });
 
@@ -866,9 +995,14 @@
             mainPage.style.display = 'block';
             mainPage.classList.remove('hidden');
             
-            // 폼 리셋
+            // 폼 리셋 및 버튼 복구
             document.getElementById('uploadForm').reset();
             document.getElementById('previewContainer').innerHTML = '';
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '꿈 나누기';
+            submitBtn.style.opacity = '1';
         }
 
         // 관리자 패널
@@ -994,9 +1128,9 @@
 
         function getSelectedSubmissions() {
             const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked'))
-                .map(checkbox => parseInt(checkbox.value));
+                .map(checkbox => checkbox.value);
             
-            return submissions.filter(submission => selectedIds.includes(submission.id));
+            return submissions.filter(submission => selectedIds.includes(submission.id.toString()));
         }
 
         // 선택된 항목 엑셀 내보내기
@@ -1011,7 +1145,7 @@
             const exportData = selectedSubmissions.map((submission, index) => ({
                 '번호': index + 1,
                 '이름': submission.name,
-                '업로드시간': submission.timestamp,
+                '업로드시간': new Date(submission.timestamp).toLocaleString('ko-KR'),
                 '카테고리': submission.category || '',
                 '설명': submission.description,
                 '이미지포함여부': '포함됨'
@@ -1051,7 +1185,7 @@
                 ...selectedSubmissions.map((submission, index) => [
                     index + 1,
                     `"${submission.name}"`,
-                    `"${submission.timestamp}"`,
+                    `"${new Date(submission.timestamp).toLocaleString('ko-KR')}"`,
                     `"${submission.category || ''}"`,
                     `"${submission.description.replace(/"/g, '""')}"`
                 ].join(','))
@@ -1097,7 +1231,7 @@
             alert(`선택된 ${selectedSubmissions.length}개의 이미지 다운로드를 시작했습니다!`);
         }
 
-        // 기존 전체 내보내기 함수들 수정
+        // 전체 내보내기 함수들
         function exportToExcel() {
             if (submissions.length === 0) {
                 alert('내보낼 데이터가 없습니다.');
@@ -1107,7 +1241,7 @@
             const exportData = submissions.map((submission, index) => ({
                 '번호': index + 1,
                 '이름': submission.name,
-                '업로드시간': submission.timestamp,
+                '업로드시간': new Date(submission.timestamp).toLocaleString('ko-KR'),
                 '카테고리': submission.category || '',
                 '설명': submission.description,
                 '이미지포함여부': '포함됨'
@@ -1145,7 +1279,7 @@
                 ...submissions.map((submission, index) => [
                     index + 1,
                     `"${submission.name}"`,
-                    `"${submission.timestamp}"`,
+                    `"${new Date(submission.timestamp).toLocaleString('ko-KR')}"`,
                     `"${submission.category || ''}"`,
                     `"${submission.description.replace(/"/g, '""')}"`
                 ].join(','))
