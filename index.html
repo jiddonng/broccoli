@@ -599,8 +599,7 @@
                     <br>
                     사진은 꿈과 직접적인 연관이 없어도 됩니다.<br>
                     여러분만의 이야기를 들려 주세요. <br>
-                    혹시 여러 가지 꿈을 가지고 계시다면,,~ <br>
-                    여러 번 작성해 주셔도 완전 됩니다!<br>
+                    혹시 여러 가지 꿈을 가지고 계시다면,,~ 여러 번 작성해 주셔도 완전 됩니다!<br>
                     <br>
                     작은 조각들을 모아 어떤 이야기가 만들어질지 계속 지켜봐 주세요!
                     </p>
@@ -867,4 +866,231 @@
             const allCheckboxes = document.querySelectorAll('.item-checkbox');
             const selectAllCheckbox = document.getElementById('selectAll');
             
-            if
+            if (count === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (count === allCheckboxes.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+            }
+            
+            // 선택된 항목 스타일 업데이트
+            allCheckboxes.forEach(checkbox => {
+                const item = document.getElementById(`item-${checkbox.value}`);
+                if (checkbox.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        function getSelectedSubmissions() {
+            const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked'))
+                .map(checkbox => parseInt(checkbox.value));
+            
+            return submissions.filter(submission => selectedIds.includes(submission.id));
+        }
+
+        // 선택된 항목 엑셀 내보내기
+        function exportSelectedToExcel() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            const exportData = selectedSubmissions.map((submission, index) => ({
+                '번호': index + 1,
+                '이름': submission.name,
+                '업로드시간': submission.timestamp,
+                '카테고리': submission.category || '',
+                '설명': submission.description,
+                '이미지포함여부': '포함됨'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, '선택된 꿈들');
+
+            worksheet['!cols'] = [
+                { width: 8 },  // 번호
+                { width: 15 }, // 이름
+                { width: 20 }, // 업로드시간
+                { width: 15 }, // 카테고리
+                { width: 50 }, // 설명
+                { width: 15 }  // 이미지포함여부
+            ];
+
+            const fileName = `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+            
+            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 엑셀 파일로 다운로드되었습니다!`);
+        }
+
+        // 선택된 항목 CSV 내보내기
+        function exportSelectedToCSV() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
+            const csvContent = [
+                headers.join(','),
+                ...selectedSubmissions.map((submission, index) => [
+                    index + 1,
+                    `"${submission.name}"`,
+                    `"${submission.timestamp}"`,
+                    `"${submission.category || ''}"`,
+                    `"${submission.description.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
+        }
+
+        // 선택된 항목 이미지 다운로드
+        function exportSelectedImages() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            selectedSubmissions.forEach((submission, index) => {
+                const link = document.createElement('a');
+                link.href = submission.photo;
+                link.download = `${submission.name}_${index + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                if (index < selectedSubmissions.length - 1) {
+                    setTimeout(() => {}, 100);
+                }
+            });
+            
+            alert(`선택된 ${selectedSubmissions.length}개의 이미지 다운로드를 시작했습니다!`);
+        }
+
+        // 기존 전체 내보내기 함수들 수정
+        function exportToExcel() {
+            if (submissions.length === 0) {
+                alert('내보낼 데이터가 없습니다.');
+                return;
+            }
+
+            const exportData = submissions.map((submission, index) => ({
+                '번호': index + 1,
+                '이름': submission.name,
+                '업로드시간': submission.timestamp,
+                '카테고리': submission.category || '',
+                '설명': submission.description,
+                '이미지포함여부': '포함됨'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, '브로콜리의 꿈');
+
+            worksheet['!cols'] = [
+                { width: 8 },  // 번호
+                { width: 15 }, // 이름
+                { width: 20 }, // 업로드시간
+                { width: 15 }, // 카테고리
+                { width: 50 }, // 설명
+                { width: 15 }  // 이미지포함여부
+            ];
+
+            const fileName = `브로콜리의꿈_전체_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+            
+            alert(`전체 ${submissions.length}건의 데이터가 엑셀 파일로 다운로드되었습니다!`);
+        }
+
+        // CSV 내보내기
+        function exportToCSV() {
+            if (submissions.length === 0) {
+                alert('내보낼 데이터가 없습니다.');
+                return;
+            }
+
+            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
+            const csvContent = [
+                headers.join(','),
+                ...submissions.map((submission, index) => [
+                    index + 1,
+                    `"${submission.name}"`,
+                    `"${submission.timestamp}"`,
+                    `"${submission.category || ''}"`,
+                    `"${submission.description.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `브로콜리의꿈_전체_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`전체 ${submissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
+        }
+
+        // 이미지 다운로드
+        function exportImages() {
+            if (submissions.length === 0) {
+                alert('다운로드할 이미지가 없습니다.');
+                return;
+            }
+
+            submissions.forEach((submission, index) => {
+                const link = document.createElement('a');
+                link.href = submission.photo;
+                link.download = `${submission.name}_${index + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 브라우저가 동시 다운로드를 제한할 수 있으므로 약간의 지연
+                if (index < submissions.length - 1) {
+                    setTimeout(() => {}, 100);
+                }
+            });
+            
+            alert(`${submissions.length}개의 이미지 다운로드를 시작했습니다!`);
+        }
+
+        // ESC 키로 관리자 패널 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideAdmin();
+            }
+        });
+    </script>
+</body>
+</html>
