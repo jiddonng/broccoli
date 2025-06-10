@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>브로콜리의 꿈</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Gothic A1', sans-serif;
+            background: #27633e;
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background:#93c393;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '🥦';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            font-size: 8rem;
+            opacity: 0.1;
+            transform: rotate(-15deg);
+        }
+
+        .header::after {
+            content: '🥦';
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            font-size: 10rem;
+            opacity: 0.1;
+            transform: rotate(25deg);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #55a3ff;
+            box-shadow: 0 0 10px rgba(85, 163, 255, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 30px;
+            border: 3px dashed #276215;
+            border-radius: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #f3fad7 0%, #dcffe3 100%);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .file-upload-label::before {
+            content: '🥦';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            opacity: 0.3;
+        }
+
+        .file-upload:hover .file-upload-label {
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+            border-color: #89f63b;
+        }
+
+        .file-upload-label i {
+            font-size: 3rem;
+            color: #55a3ff;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .preview-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .preview-image {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #b0eda4, #43ab5d);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .admin-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            color: rgb(36, 36, 36);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            z-index: 1000;
+            box-shadow: 0 3px 10px rgba(47, 47, 47, 0.3);
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+
+        .admin-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            width: 800px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .submission-item {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+
+        .submission-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* 감사 페이지 스타일 */
+        .thank-you-page {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .thank-you-page.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .thank-you-content {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .thank-you-emoji {
+            font-size: 5rem;
+            margin-bottom: 30px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .thank-you-title {
+            font-size: 2.5rem;
+            color: #43ab5d;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .thank-you-message {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #93c393, #43ab5d);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .main-page {
+            transition: all 0.5s ease;
+        }
+
+        .main-page.hidden {
+            display: none;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        /* 내보내기 버튼 스타일 */
+        .export-buttons {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .export-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .csv-btn {
+            background: linear-gradient(45deg, #17a2b8, #6f42c1);
+        }
+
+        .csv-btn:hover {
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+        }
+
+        /* 선택 기능 스타일 */
+        .select-all-container {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .submission-checkbox {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .submission-item {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .submission-item.selected {
+            border-color: #28a745;
+            background: #f8fff8;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.2);
+        }
+
+        .submission-number {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            background: #93c393;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .submission-content {
+            margin-left: 45px;
+        }
+
+        .selected-count {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <button class="admin-btn" onclick="showAdminLogin()">🔒 꿈 보기</button>
+
+    <!-- 메인 페이지 -->
+    <div class="main-page" id="mainPage">
+        <div class="container">
+            <div class="header">
+                <h1>🥦 브로콜리의 꿈</h1>
+                <br>
+                <p> 안녕하세요. 박지혜입니다. <br>
+                    먼저 관심을 가지고 찾아와 주셔서 정말 감사합니다! <br>
+                    <br>
+                    과제를 위해서 다양한 사람들의 꿈의 조각을 모아보려 합니다. <br>
+                    여러분의 꿈과 관련된 사진을 공유해 주세요! <br>
+                    <br>
+                    사진은 꿈과 직접적인 연관이 없어도 됩니다.<br>
+                    여러분만의 이야기를 들려 주세요. <br>
+                    혹시 여러 가지 꿈을 가지고 계시다면,,~ 여러 번 작성해 주셔도 완전 됩니다!<br>
+                    <br>
+                    작은 조각들을 모아 어떤 이야기가 만들어질지 계속 지켜봐 주세요!
+                    </p>
+            </div>
+
+            <div class="form-section">
+                <div class="success-message" id="successMessage">
+                    사진이 성공적으로 업로드되었습니다! 감사합니다 🎉
+                </div>
+
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="name">이름 *</label>
+                        <input type="text" id="name" placeholder="이름을 입력해주세요. 닉네임도 좋아요!" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="photo">내 꿈 공유 *</label>
+                        <div class="file-upload">
+                            <input type="file" id="photo" accept="image/*" required>
+                            <label for="photo" class="file-upload-label">
+                                <span style="font-size: 3rem;">📷</span>
+                                <div>클릭해서 내 꿈을 나타낼 수 있는 사진을 선택하세요.</div>
+                                <small>(JPG, PNG, GIF 등 이미지 파일)</small>
+                            </label>
+                        </div>
+                        <div class="preview-container" id="previewContainer"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">사진에 대한 설명 *</label>
+                        <textarea id="description" placeholder="사진에 담긴 이야기를 들려주세요.
+사진에 관한 이야기도, 꿈에 관한 이야기도 모두 좋아요!" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">카테고리 (선택사항)</label>
+                        <input type="text" id="category" placeholder="예: 여행, 일상, 사랑, 장래희망, 취미 등">
+                    </div>
+
+                    <button type="submit" class="submit-btn">꿈 나누기</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 감사 페이지 -->
+    <div class="thank-you-page" id="thankYouPage">
+        <div class="container">
+            <div class="header">
+                <h1>🥦 브로콜리의 꿈</h1>
+            </div>
+            <div class="thank-you-content">
+                <div class="thank-you-emoji">🎉✨</div>
+                <h2 class="thank-you-title">꿈 나누기 완료!</h2>
+                <div class="thank-you-message">
+                    소중한 꿈의 조각을 공유해 주셔서 정말 감사합니다.<br>
+                    여러분의 이야기 하나하나가 모여서<br>
+                    더 큰 꿈의 브로콜리가 될 거예요! 🥦<br>
+                    <br>
+                    다른 꿈도 생겼다면! 언제든 다시 와서 나눠 주세요!
+                </div>
+                <button class="back-btn" onclick="goBackToMain()">다른 꿈도 나누기</button>
+                <button class="back-btn" onclick="window.close()">창 닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 관리자 패널 -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-content">
+            <button class="close-btn" onclick="hideAdmin()">×</button>
+            <h2>업로드된 사진들</h2>
+            <div class="export-buttons">
+                <button onclick="exportToExcel()" class="export-btn">📊 전체 엑셀 다운로드</button>
+                <button onclick="exportToCSV()" class="export-btn csv-btn">📄 전체 CSV 다운로드</button>
+                <button onclick="exportImages()" class="export-btn" style="background: linear-gradient(45deg, #fd79a8, #e84393);">🖼️ 전체 이미지 다운로드</button>
+            </div>
+            <div class="select-all-container">
+                <label>
+                    <input type="checkbox" id="selectAll" class="submission-checkbox" onchange="selectAllSubmissions()">
+                    전체 선택/해제
+                </label>
+                <span id="selectedCount" class="selected-count">(0개 선택됨)</span>
+                <div style="margin-top: 10px;">
+                    <button onclick="exportSelectedToExcel()" class="export-btn" style="background: linear-gradient(45deg, #ffa726, #ff7043); font-size: 0.8rem; padding: 8px 15px;">📊 선택항목 엑셀</button>
+                    <button onclick="exportSelectedToCSV()" class="export-btn csv-btn" style="font-size: 0.8rem; padding: 8px 15px;">📄 선택항목 CSV</button>
+                    <button onclick="exportSelectedImages()" class="export-btn" style="background: linear-gradient(45deg, #ab47bc, #8e24aa); font-size: 0.8rem; padding: 8px 15px;">🖼️ 선택항목 이미지</button>
+                </div>
+            </div>
+            <div id="submissionsList"></div>
+        </div>
+    </div>
+
+    <script>
+        let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+
+        // 파일 미리보기
+        document.getElementById('photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const previewContainer = document.getElementById('previewContainer');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" alt="미리보기" class="preview-image">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewContainer.innerHTML = '';
+            }
+        });
+
+        // 폼 제출
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                id: Date.now(),
+                name: document.getElementById('name').value,
+                description: document.getElementById('description').value,
+                category: document.getElementById('category').value,
+                timestamp: new Date().toLocaleString('ko-KR')
+            };
+
+            const photoFile = document.getElementById('photo').files[0];
+            if (photoFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    formData.photo = e.target.result;
+                    submissions.push(formData);
+                    localStorage.setItem('submissions', JSON.stringify(submissions));
+                    
+                    // 감사 페이지로 전환
+                    showThankYouPage();
+                };
+                reader.readAsDataURL(photoFile);
+            }
+        });
+
+        // 감사 페이지 표시
+        function showThankYouPage() {
+            const mainPage = document.getElementById('mainPage');
+            const thankYouPage = document.getElementById('thankYouPage');
+            
+            // 메인 페이지 숨기기
+            mainPage.classList.add('hidden');
+            
+            // 감사 페이지 표시
+            setTimeout(() => {
+                thankYouPage.classList.add('show');
+            }, 300);
+        }
+
+        // 메인 페이지로 돌아가기
+        function goBackToMain() {
+            const mainPage = document.getElementById('mainPage');
+            const thankYouPage = document.getElementById('thankYouPage');
+            
+            // 감사 페이지 숨기기
+            thankYouPage.classList.remove('show');
+            
+            // 메인 페이지 표시
+            setTimeout(() => {
+                mainPage.classList.remove('hidden');
+                
+                // 폼 리셋
+                document.getElementById('uploadForm').reset();
+                document.getElementById('previewContainer').innerHTML = '';
+            }, 300);
+        }
+
+        // 관리자 패널
+        function showAdminLogin() {
+            const password = prompt('관리자 비밀번호를 입력해주세요:');
+            if (password === 'dreamofbroccoli') {
+                showAdmin();
+            } else if (password !== null) {
+                alert('비밀번호가 틀렸습니다.');
+            }
+        }
+
+        function showAdmin() {
+            document.getElementById('adminPanel').style.display = 'block';
+            displaySubmissions();
+        }
+
+        function hideAdmin() {
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function displaySubmissions() {
+            const submissionsList = document.getElementById('submissionsList');
+            
+            if (submissions.length === 0) {
+                submissionsList.innerHTML = '<p>아직 업로드된 사진이 없습니다.</p>';
+                return;
+            }
+
+            let html = '';
+            // 순서 유지를 위해 reverse 하지 않고 index 계산
+            submissions.forEach((submission, index) => {
+                const displayIndex = submissions.length - index; // 최신 것이 위에 오도록
+                html += `
+                    <div class="submission-item" id="item-${submission.id}">
+                        <div class="submission-number">${displayIndex}</div>
+                        <label style="position: absolute; top: 15px; right: 60px;">
+                            <input type="checkbox" class="submission-checkbox item-checkbox" 
+                                   value="${submission.id}" onchange="updateSelectedCount()">
+                        </label>
+                        <div class="submission-content">
+                            <h3>🥦 ${submission.name}</h3>
+                            <p><strong>업로드 시간:</strong> ${submission.timestamp}</p>
+                            ${submission.category ? `<p><strong>카테고리:</strong> ${submission.category}</p>` : ''}
+                            <div style="margin: 15px 0;">
+                                <img src="${submission.photo}" alt="업로드된 사진" class="submission-image">
+                            </div>
+                            <p><strong>설명:</strong></p>
+                            <p style="background: white; padding: 10px; border-radius: 5px; margin-top: 5px;">${submission.description}</p>
+                            <button onclick="deleteSubmission(${submission.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-top: 10px;">삭제</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            submissionsList.innerHTML = html;
+            updateSelectedCount();
+        }
+
+        function deleteSubmission(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                submissions = submissions.filter(s => s.id !== id);
+                localStorage.setItem('submissions', JSON.stringify(submissions));
+                displaySubmissions();
+            }
+        }
+
+        // 선택 관련 함수들
+        function selectAllSubmissions() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+                const item = document.getElementById(`item-${checkbox.value}`);
+                if (selectAll.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            const count = checkboxes.length;
+            const selectedCountElement = document.getElementById('selectedCount');
+            
+            selectedCountElement.textContent = `(${count}개 선택됨)`;
+            
+            // 개별 선택에 따른 전체 선택 체크박스 상태 업데이트
+            const allCheckboxes = document.querySelectorAll('.item-checkbox');
+            const selectAllCheckbox = document.getElementById('selectAll');
+            
+            if (count === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (count === allCheckboxes.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+            }
+            
+            // 선택된 항목 스타일 업데이트
+            allCheckboxes.forEach(checkbox => {
+                const item = document.getElementById(`item-${checkbox.value}`);
+                if (checkbox.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        function getSelectedSubmissions() {
+            const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked'))
+                .map(checkbox => parseInt(checkbox.value));
+            
+            return submissions.filter(submission => selectedIds.includes(submission.id));
+        }
+
+        // 선택된 항목 엑셀 내보내기
+        function exportSelectedToExcel() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            const exportData = selectedSubmissions.map((submission, index) => ({
+                '번호': index + 1,
+                '이름': submission.name,
+                '업로드시간': submission.timestamp,
+                '카테고리': submission.category || '',
+                '설명': submission.description,
+                '이미지포함여부': '포함됨'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, '선택된 꿈들');
+
+            worksheet['!cols'] = [
+                { width: 8 },  // 번호
+                { width: 15 }, // 이름
+                { width: 20 }, // 업로드시간
+                { width: 15 }, // 카테고리
+                { width: 50 }, // 설명
+                { width: 15 }  // 이미지포함여부
+            ];
+
+            const fileName = `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+            
+            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 엑셀 파일로 다운로드되었습니다!`);
+        }
+
+        // 선택된 항목 CSV 내보내기
+        function exportSelectedToCSV() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
+            const csvContent = [
+                headers.join(','),
+                ...selectedSubmissions.map((submission, index) => [
+                    index + 1,
+                    `"${submission.name}"`,
+                    `"${submission.timestamp}"`,
+                    `"${submission.category || ''}"`,
+                    `"${submission.description.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
+        }
+
+        // 선택된 항목 이미지 다운로드
+        function exportSelectedImages() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            selectedSubmissions.forEach((submission, index) => {
+                const link = document.createElement('a');
+                link.href = submission.photo;
+                link.download = `${submission.name}_${index + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                if (index < selectedSubmissions.length - 1) {
+                    setTimeout(() => {}, 100);
+                }
+            });
+            
+            alert(`선택된 ${selectedSubmissions.length}개의 이미지 다운로드를 시작했습니다!`);
+        }
+
+        // 기존 전체 내보내기 함수들 수정
+        function exportToExcel() {
+            if (submissions.length === 0) {
+                alert('내보낼 데이터가 없습니다.');
+                return;
+            }
+
+            const exportData = submissions.map((submission, index) => ({
+                '번호': index + 1,
+                '이름': submission.name,
+                '업로드시간': submission.timestamp,
+                '카테고리': submission.category || '',
+                '설명': submission.description,
+                '이미지포함여부': '포함됨'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, '브로콜리의 꿈');
+
+            worksheet['!cols'] = [
+                { width: 8 },  // 번호
+                { width: 15 }, // 이름
+                { width: 20 }, // 업로드시간
+                { width: 15 }, // 카테고리
+                { width: 50 }, // 설명
+                { width: 15 }  // 이미지포함여부
+            ];
+
+            const fileName = `브로콜리의꿈_전체_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+            
+            alert(`전체 ${submissions.length}건의 데이터가 엑셀 파일로 다운로드되었습니다!`);
+        }
+
+        // CSV 내보내기
+        function exportToCSV() {
+            if (submissions.length === 0) {
+                alert('내보낼 데이터가 없습니다.');
+                return;
+            }
+
+            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
+            const csvContent = [
+                headers.join(','),
+                ...submissions.map((submission, index) => [
+                    index + 1,
+                    `"${submission.name}"`,
+                    `"${submission.timestamp}"`,
+                    `"${submission.category || ''}"`,
+                    `"${submission.description.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `브로콜리의꿈_전체_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`전체 ${submissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
+        }
+
+        // 이미지 다운로드
+        function exportImages() {
+            if (submissions.length === 0) {
+                alert('다운로드할 이미지가 없습니다.');
+                return;
+            }
+
+            submissions.forEach((submission, index) => {
+                const link = document.createElement('a');
+                link.href = submission.photo;
+                link.download = `${submission.name}_${index + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 브라우저가 동시 다운로드를 제한할 수 있으므로 약간의 지연
+                if (index < submissions.length - 1) {
+                    setTimeout(() => {}, 100);
+                }
+            });
+            
+            alert(`${submissions.length}개의 이미지 다운로드를 시작했습니다!`);
+        }
+
+        // ESC 키로 관리자 패널 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideAdmin();
+            }
+        });
+    </script>
+</body>
+</html>
