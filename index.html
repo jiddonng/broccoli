@@ -6,6 +6,10 @@
     <title>브로콜리의 꿈</title>
     <link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
     <style>
         * {
             margin: 0;
@@ -598,7 +602,8 @@
                     <br>
                     사진은 꿈과 직접적인 연관이 없어도 됩니다.<br>
                     여러분만의 이야기를 들려 주세요. <br>
-                    혹시 여러 가지 꿈을 가지고 계시다면,,~ 여러 번 작성해 주셔도 완전 됩니다!<br>
+                    혹시 여러 가지 꿈을 가지고 계시다면,,~ <br>
+                    여러 번 작성해 주셔도 완전 됩니다!<br>
                     <br>
                     작은 조각들을 모아 어떤 이야기가 만들어질지 계속 지켜봐 주세요!
                     </p>
@@ -694,7 +699,73 @@
     </div>
 
     <script>
-        let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+        // Firebase 설정 (여기에 본인의 Firebase 설정을 넣으세요)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtTKxuvAB1M916VVXu3loXbCUYGRslWA4",
+    authDomain: "dream-of-broccoli.firebaseapp.com",
+    projectId: "dream-of-broccoli",
+    storageBucket: "dream-of-broccoli.firebasestorage.app",
+    messagingSenderId: "199889319795",
+    appId: "1:199889319795:web:854cb8634a7107bd597706",
+    measurementId: "G-WDPKJHP8JR"
+  };
+
+        // Firebase 초기화
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let submissions = [];
+
+        // Firestore에서 데이터 불러오기
+        async function loadSubmissions() {
+            try {
+                const querySnapshot = await db.collection('submissions').orderBy('timestamp', 'desc').get();
+                submissions = [];
+                querySnapshot.forEach((doc) => {
+                    submissions.push({ id: doc.id, ...doc.data() });
+                });
+                console.log('데이터 로드 완료:', submissions.length, '개');
+            } catch (error) {
+                console.error('데이터 로드 오류:', error);
+                // 로컬 스토리지 백업 사용
+                submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+            }
+        }
+
+        // Firestore에 데이터 저장
+        async function saveSubmission(data) {
+            try {
+                const docRef = await db.collection('submissions').add(data);
+                console.log('데이터 저장 완료:', docRef.id);
+                
+                // 로컬 스토리지 백업도 저장
+                submissions.push({ id: docRef.id, ...data });
+                localStorage.setItem('submissions', JSON.stringify(submissions));
+                
+                return docRef.id;
+            } catch (error) {
+                console.error('데이터 저장 오류:', error);
+                // 실패 시 로컬 스토리지만 사용
+                const localId = Date.now().toString();
+                const submissionWithId = { id: localId, ...data };
+                submissions.push(submissionWithId);
+                localStorage.setItem('submissions', JSON.stringify(submissions));
+                return localId;
+            }
+        }
+
+        // Firestore에서 데이터 삭제
+        async function deleteSubmissionFromFirestore(id) {
+            try {
+                await db.collection('submissions').doc(id).delete();
+                console.log('데이터 삭제 완료:', id);
+            } catch (error) {
+                console.error('데이터 삭제 오류:', error);
+            }
+        }
+
+        // 페이지 로드 시 데이터 불러오기
+        window.addEventListener('load', loadSubmissions);
 
         // 파일 미리보기
         document.getElementById('photo').addEventListener('change', function(e) {
@@ -713,24 +784,24 @@
         });
 
         // 폼 제출
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = {
-                id: Date.now(),
                 name: document.getElementById('name').value,
                 description: document.getElementById('description').value,
                 category: document.getElementById('category').value,
-                timestamp: new Date().toLocaleString('ko-KR')
+                timestamp: new Date().toISOString()
             };
 
             const photoFile = document.getElementById('photo').files[0];
             if (photoFile) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     formData.photo = e.target.result;
-                    submissions.push(formData);
-                    localStorage.setItem('submissions', JSON.stringify(submissions));
+                    
+                    // Firestore에 저장
+                    await saveSubmission(formData);
                     
                     // 감사 페이지로 전환
                     showThankYouPage();
@@ -782,7 +853,10 @@
 
         function showAdmin() {
             document.getElementById('adminPanel').style.display = 'block';
-            displaySubmissions();
+            // 데이터 새로고침 후 표시
+            loadSubmissions().then(() => {
+                displaySubmissions();
+            });
         }
 
         function hideAdmin() {
@@ -798,9 +872,8 @@
             }
 
             let html = '';
-            // 순서 유지를 위해 reverse 하지 않고 index 계산
             submissions.forEach((submission, index) => {
-                const displayIndex = submissions.length - index; // 최신 것이 위에 오도록
+                const displayIndex = index + 1;
                 html += `
                     <div class="submission-item" id="item-${submission.id}">
                         <div class="submission-number">${displayIndex}</div>
@@ -810,14 +883,14 @@
                         </label>
                         <div class="submission-content">
                             <h3>🥦 ${submission.name}</h3>
-                            <p><strong>업로드 시간:</strong> ${submission.timestamp}</p>
+                            <p><strong>업로드 시간:</strong> ${new Date(submission.timestamp).toLocaleString('ko-KR')}</p>
                             ${submission.category ? `<p><strong>카테고리:</strong> ${submission.category}</p>` : ''}
                             <div style="margin: 10px 0;">
                                 <img src="${submission.photo}" alt="업로드된 사진" class="submission-image">
                             </div>
                             <p><strong>설명:</strong></p>
                             <p style="background: white; padding: 8px; border-radius: 5px; margin-top: 5px; font-size: 0.8rem;">${submission.description}</p>
-                            <button onclick="deleteSubmission(${submission.id})" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; margin-top: 8px; font-size: 0.75rem;">삭제</button>
+                            <button onclick="deleteSubmission('${submission.id}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; margin-top: 8px; font-size: 0.75rem;">삭제</button>
                         </div>
                     </div>
                 `;
@@ -827,8 +900,12 @@
             updateSelectedCount();
         }
 
-        function deleteSubmission(id) {
+        async function deleteSubmission(id) {
             if (confirm('정말 삭제하시겠습니까?')) {
+                // Firestore에서 삭제
+                await deleteSubmissionFromFirestore(id);
+                
+                // 로컬 배열에서도 삭제
                 submissions = submissions.filter(s => s.id !== id);
                 localStorage.setItem('submissions', JSON.stringify(submissions));
                 displaySubmissions();
@@ -864,7 +941,7 @@
             const allCheckboxes = document.querySelectorAll('.item-checkbox');
             const selectAllCheckbox = document.getElementById('selectAll');
             
-            if (count === 0) {
+             if (count === 0) {
                 selectAllCheckbox.indeterminate = false;
                 selectAllCheckbox.checked = false;
             } else if (count === allCheckboxes.length) {
