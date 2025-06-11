@@ -489,7 +489,7 @@
                             <label for="photo" class="file-upload-label">
                                 <span>📷</span>
                                 <div>클릭해서 내 꿈을 나타내는는 사진을 선택하세요.</div>
-                                <small>(JPG, PNG, WEBP - 최대 2MB)</small>
+                                <small>(JPG, PNG, WEBP - 최대 4MB)</small>
                             </label>
                         </div>
                         <div class="preview-container" id="previewContainer"></div>
@@ -594,8 +594,9 @@
         // 이미지 압축
         function compressImage(file, maxSize = 800, quality = 0.7) {
             return new Promise((resolve, reject) => {
-                if (file.size > 2 * 1024 * 1024) {
-                    reject(new Error('파일 크기가 2MB를 초과합니다.'));
+if (file.size > 4 * 1024 * 1024) {
+    reject(new Error('파일 크기가 4MB를 초과합니다.'));
+
                     return;
                 }
 
@@ -708,7 +709,8 @@
             const submissionsList = document.getElementById('submissionsList');
             
             if (submissions.length === 0) {
-                submissionsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">아직 업로드된 꿈이 없습니다 🥦<br><small>모든 기기에서 실시간으로 동기화됩니다!</small></p>';
+                submissionsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">아직 업로드된 꿈이 없습니다 🥦<br>
+                    </p>';
                 return;
             }
 
