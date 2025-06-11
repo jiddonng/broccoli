@@ -94,7 +94,7 @@
             font-size: 0.95rem;
         }
 
-        input[type="text"], input[type="email"], textarea {
+        input[type="text"], textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -268,16 +268,6 @@
             margin-bottom: 8px;
         }
 
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: none;
-            font-size: 0.9rem;
-        }
-
         .thank-you-page {
             display: none;
             opacity: 0;
@@ -341,17 +331,101 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .export-btn {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-            border: none;
-            padding: 8px 15px;
+        .export-buttons {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .csv-btn {
+            background: linear-gradient(45deg, #17a2b8, #6f42c1);
+        }
+
+        .csv-btn:hover {
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+        }
+
+        .select-all-container {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #f8f9fa;
             border-radius: 8px;
-            cursor: pointer;
-            margin: 2px;
-            font-size: 0.75rem;
+            border: 1px solid #e9ecef;
+            font-size: 0.85rem;
+        }
+
+        .submission-checkbox {
+            margin-right: 8px;
+            transform: scale(1.1);
+        }
+
+        .submission-item.selected {
+            border-color: #28a745;
+            background: #f8fff8;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.2);
+        }
+
+        .submission-number {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            background: #93c393;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
-            transition: all 0.3s ease;
+            font-size: 0.75rem;
+        }
+
+        .submission-content {
+            margin-left: 35px;
+        }
+
+        .submission-content h3 {
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .submission-content p {
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .selected-count {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: #43ab5d;
+        }
+
+        .loading-spinner {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
@@ -370,6 +444,14 @@
 </head>
 <body>
     <button class="admin-btn" onclick="showAdminLogin()">🔒 꿈 보기</button>
+
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner">🥦</div>
+            <div style="margin-top: 10px;">꿈을 저장하는 중...</div>
+        </div>
+    </div>
 
     <!-- 메인 페이지 -->
     <div class="main-page" id="mainPage">
@@ -393,10 +475,6 @@
             </div>
 
             <div class="form-section">
-                <div class="success-message" id="successMessage">
-                    사진이 성공적으로 업로드되었습니다! 감사합니다 🎉
-                </div>
-
                 <form id="uploadForm">
                     <div class="form-group">
                         <label for="name">이름 *</label>
@@ -447,6 +525,7 @@
                     여러분의 이야기 하나하나가 모여서<br>
                     더 큰 꿈의 브로콜리가 될 거예요! 🥦<br>
                     <br>
+                    <strong>🌐 모든 기기에서 실시간으로 확인 가능합니다!</strong><br>
                     다른 꿈도 생겼다면! 언제든 다시 와서 나눠 주세요!
                 </div>
                 <button class="back-btn" onclick="goBackToMain()">다른 꿈도 나누기</button>
@@ -459,10 +538,29 @@
     <div class="admin-panel" id="adminPanel">
         <div class="admin-content">
             <button class="close-btn" onclick="hideAdmin()">×</button>
-            <h2>업로드된 사진들</h2>
-            <div style="margin-bottom: 15px;">
-                <button onclick="exportToExcel()" class="export-btn">📊 엑셀 다운로드</button>
-                <button onclick="loadSubmissions()" class="export-btn" style="background: #007bff;">🔄 새로고침</button>
+            <h2>🌐 모든 기기에서 실시간 동기화된 꿈들</h2>
+            <div class="export-buttons">
+                <button onclick="exportToExcel()" class="export-btn">📊 전체 엑셀</button>
+                <button onclick="exportToCSV()" class="export-btn csv-btn">📄 전체 CSV</button>
+                <button onclick="exportImages()" class="export-btn" style="background: linear-gradient(45deg, #fd79a8, #e84393);">🖼️ 전체 이미지</button>
+            </div>
+            <div class="select-all-container">
+                <label>
+                    <input type="checkbox" id="selectAll" class="submission-checkbox" onchange="selectAllSubmissions()">
+                    전체 선택/해제
+                </label>
+                <span id="selectedCount" class="selected-count">(0개 선택됨)</span>
+                <div style="margin-top: 8px;">
+                    <button onclick="exportSelectedToExcel()" class="export-btn" style="background: linear-gradient(45deg, #ffa726, #ff7043);">📊 선택 엑셀</button>
+                    <button onclick="exportSelectedToCSV()" class="export-btn csv-btn">📄 선택 CSV</button>
+                    <button onclick="exportSelectedImages()" class="export-btn" style="background: linear-gradient(45deg, #ab47bc, #8e24aa);">🖼️ 선택 이미지</button>
+                </div>
+                <div style="margin-top: 8px;">
+                    <button onclick="loadSubmissions()" class="export-btn" style="background: #007bff;">🔄 새로고침</button>
+                    <span style="font-size: 0.8rem; color: #666; margin-left: 10px;">
+                        총 <span id="totalCount">0</span>개의 꿈이 저장되었습니다
+                    </span>
+                </div>
             </div>
             <div id="submissionsList"></div>
         </div>
@@ -470,8 +568,8 @@
 
     <script>
         // ⭐ 여기에 Supabase 정보 입력하세요!
-        const SUPABASE_URL = 'https://supabase.com/dashboard/project/vpesurcjrvuvqtiagulc/settings/api-keys'  // 3단계에서 복사한 URL
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwZXN1cmNqcnZ1dnF0aWFndWxjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTYxMDM1MywiZXhwIjoyMDY1MTg2MzUzfQ.7qanxKTiadEQ8eMEvF5HD8Eh7FV-1qai6MBA9yNZLAY'  // 3단계에서 복사한 anon public 키
+        const SUPABASE_URL = 'https://zmhtxqvprkdbiwxvnwff.supabase.co'     // 3단계에서 복사한 URL
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptaHR4cXZwcmtkYml3eHZud2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2MTExMDYsImV4cCI6MjA2NTE4NzEwNn0.ZGL0DcMY93cWcqcPmkkuzCJVqkmA1oBLNZ8zc5c4CjY' // 3단계에서 복사한 anon public 키
         
         let supabase;
         let submissions = [];
@@ -480,20 +578,20 @@
         function initSupabase() {
             try {
                 if (SUPABASE_URL.includes('YOUR_') || SUPABASE_KEY.includes('YOUR_')) {
-                    console.log('Supabase 설정 필요 - 로컬 모드 사용');
-                    return false;
+                    throw new Error('Supabase 설정이 필요합니다');
                 }
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('✅ Supabase 연결 성공!');
+                console.log('✅ Supabase 연결 성공! 모든 기기에서 동기화됩니다.');
                 return true;
             } catch (error) {
                 console.error('❌ Supabase 연결 실패:', error);
+                alert('데이터베이스 연결에 실패했습니다. Supabase 설정을 확인해주세요.');
                 return false;
             }
         }
 
         // 이미지 압축
-        function processImage(file) {
+        function compressImage(file, maxSize = 800, quality = 0.7) {
             return new Promise((resolve, reject) => {
                 if (file.size > 2 * 1024 * 1024) {
                     reject(new Error('파일 크기가 2MB를 초과합니다.'));
@@ -505,7 +603,6 @@
                 const img = new Image();
                 
                 img.onload = function() {
-                    const maxSize = 800;
                     let { width, height } = img;
                     
                     if (width > maxSize || height > maxSize) {
@@ -522,7 +619,7 @@
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    const compressedData = canvas.toDataURL('image/jpeg', 0.7);
+                    const compressedData = canvas.toDataURL('image/jpeg', quality);
                     resolve(compressedData);
                 };
                 
@@ -534,63 +631,75 @@
             });
         }
 
-        // 데이터 저장
+        // 데이터 저장 (Supabase)
         async function saveSubmission(data) {
-            const submissionData = {
-                name: data.name,
-                description: data.description,
-                category: data.category || '',
-                photo: data.photo,
-                created_at: new Date().toISOString()
-            };
-
-            if (supabase) {
-                try {
-                    const { data: result, error } = await supabase
-                        .from('submissions')
-                        .insert([submissionData]);
-                    
-                    if (error) throw error;
-                    console.log('✅ Supabase 저장 성공!');
-                    return 'success';
-                } catch (error) {
-                    console.error('❌ Supabase 저장 실패:', error);
-                }
+            if (!supabase) {
+                throw new Error('데이터베이스에 연결되지 않았습니다.');
             }
 
-            // 백업: 로컬 스토리지
             try {
-                const localData = { id: Date.now(), ...submissionData };
-                submissions.unshift(localData);
-                localStorage.setItem('submissions', JSON.stringify(submissions));
-                console.log('💾 로컬 저장 완료');
-                return 'local';
+                const { data: result, error } = await supabase
+                    .from('submissions')
+                    .insert([{
+                        name: data.name,
+                        description: data.description,
+                        category: data.category || null,
+                        photo: data.photo
+                    }])
+                    .select();
+
+                if (error) throw error;
+
+                console.log('✅ 성공! 모든 기기에서 확인 가능합니다:', result[0].id);
+                return result[0].id;
             } catch (error) {
-                throw new Error('저장에 실패했습니다.');
+                console.error('❌ 저장 실패:', error);
+                throw new Error('저장에 실패했습니다: ' + error.message);
             }
         }
 
-        // 데이터 불러오기
+        // 데이터 불러오기 (Supabase)
         async function loadSubmissions() {
-            if (supabase) {
-                try {
-                    const { data, error } = await supabase
-                        .from('submissions')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-                    
-                    if (error) throw error;
-                    submissions = data || [];
-                    console.log('✅ Supabase에서 로드:', submissions.length, '개');
-                } catch (error) {
-                    console.error('❌ Supabase 로드 실패:', error);
-                    submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-                }
-            } else {
-                submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-                console.log('💾 로컬에서 로드:', submissions.length, '개');
+            if (!supabase) {
+                console.error('Supabase 연결 없음');
+                return;
             }
-            displaySubmissions();
+
+            try {
+                const { data, error } = await supabase
+                    .from('submissions')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (error) throw error;
+
+                submissions = data || [];
+                console.log('✅ 실시간 데이터 로드:', submissions.length, '개');
+                
+                if (document.getElementById('submissionsList')) {
+                    displaySubmissions();
+                }
+                
+                // 총 개수 업데이트
+                const totalElement = document.getElementById('totalCount');
+                if (totalElement) {
+                    totalElement.textContent = submissions.length;
+                }
+                
+            } catch (error) {
+                console.error('❌ 데이터 로드 실패:', error);
+                alert('데이터를 불러오는데 실패했습니다.');
+            }
+        }
+
+        // 로딩 표시
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
         }
 
         // 화면에 데이터 표시
@@ -598,22 +707,34 @@
             const submissionsList = document.getElementById('submissionsList');
             
             if (submissions.length === 0) {
-                submissionsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">아직 업로드된 꿈이 없습니다 🥦</p>';
+                submissionsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">아직 업로드된 꿈이 없습니다 🥦<br><small>모든 기기에서 실시간으로 동기화됩니다!</small></p>';
                 return;
             }
 
             let html = '';
             submissions.forEach((submission, index) => {
+                const displayIndex = index + 1;
                 html += `
-                    <div class="submission-item">
-                        <h3>🥦 ${submission.name}</h3>
-                        <p><strong>시간:</strong> ${new Date(submission.created_at).toLocaleString('ko-KR')}</p>
-                        ${submission.category ? `<p><strong>카테고리:</strong> ${submission.category}</p>` : ''}
-                        <div style="margin: 10px 0;">
-                            <img src="${submission.photo}" alt="꿈 사진" class="submission-image">
+                    <div class="submission-item" id="item-${submission.id}">
+                        <div class="submission-number">${displayIndex}</div>
+                        <label style="position: absolute; top: 12px; right: 45px;">
+                            <input type="checkbox" class="submission-checkbox item-checkbox" 
+                                   value="${submission.id}" onchange="updateSelectedCount()">
+                        </label>
+                        <div class="submission-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h3>🥦 ${submission.name}</h3>
+                                <span style="font-size: 0.7rem; color: #28a745;" title="모든 기기에서 실시간 동기화">🌐 실시간</span>
+                            </div>
+                            <p><strong>시간:</strong> ${new Date(submission.created_at).toLocaleString('ko-KR')}</p>
+                            ${submission.category ? `<p><strong>카테고리:</strong> ${submission.category}</p>` : ''}
+                            <div style="margin: 10px 0;">
+                                <img src="${submission.photo}" alt="꿈 사진" class="submission-image">
+                            </div>
+                            <p><strong>이야기:</strong></p>
+                            <p style="background: white; padding: 8px; border-radius: 5px; margin-top: 5px;">${submission.description}</p>
+                            <button onclick="deleteSubmission('${submission.id}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; margin-top: 8px; font-size: 0.75rem;">삭제</button>
                         </div>
-                        <p><strong>이야기:</strong></p>
-                        <p style="background: white; padding: 8px; border-radius: 5px; margin-top: 5px;">${submission.description}</p>
                     </div>
                 `;
             });
@@ -628,6 +749,248 @@
                 return;
             }
 
+            displaySubmissions();
+        }
+
+        // 데이터 삭제 (Supabase)
+        async function deleteSubmission(id) {
+            if (!confirm('정말 삭제하시겠습니까?')) {
+                return;
+            }
+
+            if (supabase) {
+                try {
+                    const { error } = await supabase
+                        .from('submissions')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) throw error;
+                    console.log('✅ 서버에서 삭제 완료:', id);
+                } catch (error) {
+                    console.error('❌ 서버 삭제 실패:', error);
+                    alert('서버에서 삭제하는데 실패했습니다.');
+                    return;
+                }
+            }
+
+            // 로컬 데이터에서도 삭제
+            submissions = submissions.filter(s => s.id.toString() !== id.toString());
+            displaySubmissions();
+        }
+
+        // 선택 관련 함수들
+        function selectAllSubmissions() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+                const item = document.getElementById(`item-${checkbox.value}`);
+                if (selectAll.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            const count = checkboxes.length;
+            const selectedCountElement = document.getElementById('selectedCount');
+            
+            selectedCountElement.textContent = `(${count}개 선택됨)`;
+            
+            // 개별 선택에 따른 전체 선택 체크박스 상태 업데이트
+            const allCheckboxes = document.querySelectorAll('.item-checkbox');
+            const selectAllCheckbox = document.getElementById('selectAll');
+            
+            if (count === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (count === allCheckboxes.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+            }
+            
+            // 선택된 항목 스타일 업데이트
+            allCheckboxes.forEach(checkbox => {
+                const item = document.getElementById(`item-${checkbox.value}`);
+                if (checkbox.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        function getSelectedSubmissions() {
+            const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked'))
+                .map(checkbox => checkbox.value);
+            
+            return submissions.filter(submission => selectedIds.includes(submission.id.toString()));
+        }
+
+        // 선택된 항목 엑셀 내보내기
+        function exportSelectedToExcel() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            const exportData = selectedSubmissions.map((submission, index) => ({
+                '번호': index + 1,
+                '이름': submission.name,
+                '업로드시간': new Date(submission.created_at).toLocaleString('ko-KR'),
+                '카테고리': submission.category || '',
+                '설명': submission.description
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, '선택된 꿈들');
+
+            worksheet['!cols'] = [
+                { width: 8 },  // 번호
+                { width: 15 }, // 이름
+                { width: 20 }, // 업로드시간
+                { width: 15 }, // 카테고리
+                { width: 50 }  // 설명
+            ];
+
+            const fileName = `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+            
+            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 엑셀 파일로 다운로드되었습니다!`);
+        }
+
+        // 선택된 항목 CSV 내보내기
+        function exportSelectedToCSV() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
+            const csvContent = [
+                headers.join(','),
+                ...selectedSubmissions.map((submission, index) => [
+                    index + 1,
+                    `"${submission.name}"`,
+                    `"${new Date(submission.created_at).toLocaleString('ko-KR')}"`,
+                    `"${submission.category || ''}"`,
+                    `"${submission.description.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
+        }
+
+        // 선택된 항목 이미지 다운로드
+        function exportSelectedImages() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            selectedSubmissions.forEach((submission, index) => {
+                const link = document.createElement('a');
+                link.href = submission.photo;
+                link.download = `${submission.name}_${index + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                if (index < selectedSubmissions.length - 1) {
+                    setTimeout(() => {}, 100);
+                }
+            });
+            
+            alert(`선택된 ${selectedSubmissions.length}개의 이미지 다운로드를 시작했습니다!`);
+        }
+
+        // CSV 내보내기
+        function exportToCSV() {
+            if (submissions.length === 0) {
+                alert('내보낼 데이터가 없습니다.');
+                return;
+            }
+
+            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
+            const csvContent = [
+                headers.join(','),
+                ...submissions.map((submission, index) => [
+                    index + 1,
+                    `"${submission.name}"`,
+                    `"${new Date(submission.created_at).toLocaleString('ko-KR')}"`,
+                    `"${submission.category || ''}"`,
+                    `"${submission.description.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `브로콜리의꿈_전체_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`전체 ${submissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
+        }
+
+        // 이미지 다운로드
+        function exportImages() {
+            if (submissions.length === 0) {
+                alert('다운로드할 이미지가 없습니다.');
+                return;
+            }
+
+            submissions.forEach((submission, index) => {
+                const link = document.createElement('a');
+                link.href = submission.photo;
+                link.download = `${submission.name}_${index + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 브라우저가 동시 다운로드를 제한할 수 있으므로 약간의 지연
+                if (index < submissions.length - 1) {
+                    setTimeout(() => {}, 100);
+                }
+            });
+            
+            alert(`${submissions.length}개의 이미지 다운로드를 시작했습니다!`);
+
+
+
             const exportData = submissions.map((submission, index) => ({
                 '번호': index + 1,
                 '이름': submission.name,
@@ -640,10 +1003,229 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, '브로콜리의 꿈');
 
-            const fileName = `브로콜리의꿈_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            worksheet['!cols'] = [
+                { width: 8 },  // 번호
+                { width: 15 }, // 이름
+                { width: 20 }, // 업로드시간
+                { width: 15 }, // 카테고리
+                { width: 50 }  // 설명
+            ];
+
+            const fileName = `브로콜리의꿈_전체_${new Date().toISOString().slice(0, 10)}.xlsx`;
             XLSX.writeFile(workbook, fileName);
             
-            alert(`${submissions.length}건의 데이터가 다운로드되었습니다!`);
+            alert(`전체 ${submissions.length}건의 데이터가 다운로드되었습니다!`);
+        }
+
+        // 선택 관련 함수들
+        function selectAllSubmissions() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+                const item = document.getElementById(`item-${checkbox.value}`);
+                if (selectAll.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const checkboxes = document.querySelectorAll('.item-checkbox:checked');
+            const count = checkboxes.length;
+            const selectedCountElement = document.getElementById('selectedCount');
+            
+            selectedCountElement.textContent = `(${count}개 선택됨)`;
+            
+            // 개별 선택에 따른 전체 선택 체크박스 상태 업데이트
+            const allCheckboxes = document.querySelectorAll('.item-checkbox');
+            const selectAllCheckbox = document.getElementById('selectAll');
+            
+            if (count === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (count === allCheckboxes.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+            }
+            
+            // 선택된 항목 스타일 업데이트
+            allCheckboxes.forEach(checkbox => {
+                const item = document.getElementById(`item-${checkbox.value}`);
+                if (checkbox.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        function getSelectedSubmissions() {
+            const selectedIds = Array.from(document.querySelectorAll('.item-checkbox:checked'))
+                .map(checkbox => checkbox.value);
+            
+            return submissions.filter(submission => selectedIds.includes(submission.id.toString()));
+        }
+
+        // 선택된 항목 엑셀 내보내기
+        function exportSelectedToExcel() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            const exportData = selectedSubmissions.map((submission, index) => ({
+                '번호': index + 1,
+                '이름': submission.name,
+                '업로드시간': new Date(submission.created_at).toLocaleString('ko-KR'),
+                '카테고리': submission.category || '',
+                '설명': submission.description
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, '선택된 꿈들');
+
+            worksheet['!cols'] = [
+                { width: 8 },  // 번호
+                { width: 15 }, // 이름
+                { width: 20 }, // 업로드시간
+                { width: 15 }, // 카테고리
+                { width: 50 }  // 설명
+            ];
+
+            const fileName = `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+            
+            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 엑셀 파일로 다운로드되었습니다!`);
+        }
+
+        // 선택된 항목 CSV 내보내기
+        function exportSelectedToCSV() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
+            const csvContent = [
+                headers.join(','),
+                ...selectedSubmissions.map((submission, index) => [
+                    index + 1,
+                    `"${submission.name}"`,
+                    `"${new Date(submission.created_at).toLocaleString('ko-KR')}"`,
+                    `"${submission.category || ''}"`,
+                    `"${submission.description.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `브로콜리의꿈_선택항목_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`선택된 ${selectedSubmissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
+        }
+
+        // 선택된 항목 이미지 다운로드
+        function exportSelectedImages() {
+            const selectedSubmissions = getSelectedSubmissions();
+            
+            if (selectedSubmissions.length === 0) {
+                alert('선택된 항목이 없습니다.');
+                return;
+            }
+
+            selectedSubmissions.forEach((submission, index) => {
+                const link = document.createElement('a');
+                link.href = submission.photo;
+                link.download = `${submission.name}_${index + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                if (index < selectedSubmissions.length - 1) {
+                    setTimeout(() => {}, 100);
+                }
+            });
+            
+            alert(`선택된 ${selectedSubmissions.length}개의 이미지 다운로드를 시작했습니다!`);
+        }
+
+        // CSV 내보내기
+        function exportToCSV() {
+            if (submissions.length === 0) {
+                alert('내보낼 데이터가 없습니다.');
+                return;
+            }
+
+            const headers = ['번호', '이름', '업로드시간', '카테고리', '설명'];
+            const csvContent = [
+                headers.join(','),
+                ...submissions.map((submission, index) => [
+                    index + 1,
+                    `"${submission.name}"`,
+                    `"${new Date(submission.created_at).toLocaleString('ko-KR')}"`,
+                    `"${submission.category || ''}"`,
+                    `"${submission.description.replace(/"/g, '""')}"`
+                ].join(','))
+            ].join('\n');
+
+            const bom = '\uFEFF';
+            const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `브로콜리의꿈_전체_${new Date().toISOString().slice(0, 10)}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(`전체 ${submissions.length}건의 데이터가 CSV 파일로 다운로드되었습니다!`);
+        }
+
+        // 이미지 다운로드
+        function exportImages() {
+            if (submissions.length === 0) {
+                alert('다운로드할 이미지가 없습니다.');
+                return;
+            }
+
+            submissions.forEach((submission, index) => {
+                const link = document.createElement('a');
+                link.href = submission.photo;
+                link.download = `${submission.name}_${index + 1}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 브라우저가 동시 다운로드를 제한할 수 있으므로 약간의 지연
+                if (index < submissions.length - 1) {
+                    setTimeout(() => {}, 100);
+                }
+            });
+            
+            alert(`${submissions.length}개의 이미지 다운로드를 시작했습니다!`);
         }
 
         // 이벤트 리스너들
@@ -666,8 +1248,11 @@
             e.preventDefault();
             
             const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
             submitBtn.disabled = true;
             submitBtn.textContent = '업로드 중...';
+            
+            showLoading();
             
             try {
                 const name = document.getElementById('name').value.trim();
@@ -679,7 +1264,7 @@
                     throw new Error('필수 항목을 모두 입력해주세요.');
                 }
 
-                const processedImage = await processImage(photoFile);
+                const processedImage = await compressImage(photoFile);
                 
                 const formData = {
                     name,
@@ -689,12 +1274,15 @@
                 };
                 
                 await saveSubmission(formData);
+                
+                hideLoading();
                 showThankYouPage();
                 
             } catch (error) {
+                hideLoading();
                 alert(`오류: ${error.message}`);
                 submitBtn.disabled = false;
-                submitBtn.textContent = '꿈 나누기';
+                submitBtn.textContent = originalText;
             }
         });
 
@@ -710,8 +1298,9 @@
             document.getElementById('mainPage').style.display = 'block';
             document.getElementById('uploadForm').reset();
             document.getElementById('previewContainer').innerHTML = '';
-            document.getElementById('submitBtn').disabled = false;
-            document.getElementById('submitBtn').textContent = '꿈 나누기';
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '꿈 나누기';
         }
 
         function showAdminLogin() {
@@ -729,14 +1318,52 @@
         }
 
         // 페이지 로드 시 초기화
-        window.addEventListener('load', function() {
-            const hasSupabase = initSupabase();
-            if (hasSupabase) {
-                loadSubmissions();
-            } else {
-                submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
-            }
-        });
+        window.addEventListener('load', async function() {
+            const connected = initSupabase();
+            if (connected) {
+                await loadSubmissions();
+                
+            // 주기적으로 데이터 새로고침 (30초마다)
+            setInterval(loadSubmissions, 30000);
+        }
+    });
+
+    // ESC 키로 관리자 패널 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideAdmin();
+        }
+    });
+
+    // 실시간 업데이트를 위한 Supabase 구독 (선택사항)
+    function setupRealTimeUpdates() {
+        if (!supabase) return;
+        
+        try {
+            supabase
+                .channel('submissions')
+                .on('postgres_changes', 
+                    { event: 'INSERT', schema: 'public', table: 'submissions' }, 
+                    payload => {
+                        console.log('🔄 새로운 꿈이 추가되었습니다!', payload);
+                        loadSubmissions(); // 새 데이터 로드
+                    }
+                )
+                .subscribe();
+                
+            console.log('✅ 실시간 업데이트 활성화');
+        } catch (error) {
+            console.log('실시간 업데이트 설정 실패:', error);
+        }
+    }
+
+    // 실시간 업데이트 설정 (페이지 로드 후 5초 뒤)
+    setTimeout(setupRealTimeUpdates, 5000);
     </script>
+
+
 </body>
+
+
+
 </html>
