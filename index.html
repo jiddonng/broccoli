@@ -742,8 +742,7 @@ async function loadSubmissions() {
                             </div>
                             <p><strong>이야기:</strong></p>
                             <p style="background: white; padding: 8px; border-radius: 5px; margin-top: 5px;">${submission.description}</p>
-                            <button onclick="deleteSubmission('${submission.id}')" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; margin-top: 8px; font-size: 0.75rem;">삭제</button>
-                        </div>
+                            <button onclick="deleteSubmission('${submission.id}', this)" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 5px; cursor: pointer; margin-top: 8px; font-size: 0.75rem;">삭제</button>                        </div>
                     </div>
                 `;
             });
@@ -762,52 +761,41 @@ async function loadSubmissions() {
         }
 
 // 데이터 삭제 (Supabase) - 수정된 버전
+// 간단한 삭제 함수
 async function deleteSubmission(id) {
     if (!confirm('정말 삭제하시겠습니까?')) {
         return;
     }
 
-    // 로딩 표시
-    const deleteButton = event.target;
-    const originalText = deleteButton.textContent;
-    deleteButton.disabled = true;
-    deleteButton.textContent = '삭제 중...';
-    deleteButton.style.opacity = '0.6';
-
     try {
+        console.log('삭제 시도:', id);
+        
         if (supabase) {
-            // Supabase에서 삭제
             const { error } = await supabase
                 .from('submissions')
                 .delete()
                 .eq('id', id);
 
             if (error) {
-                throw new Error(`데이터베이스 삭제 실패: ${error.message}`);
+                console.error('Supabase 삭제 에러:', error);
+                throw new Error(`삭제 실패: ${error.message}`);
             }
             
-            console.log('✅ 서버에서 완전 삭제 완료:', id);
+            console.log('✅ 서버에서 삭제 완료:', id);
         }
 
-        // 삭제 후 서버에서 최신 데이터 다시 불러오기 (더 확실한 방법)
+        // 삭제 후 데이터 새로고침
         await loadSubmissions();
-        
-        console.log('✅ 삭제 완료 및 데이터 새로고침');
+        alert('삭제되었습니다!');
         
     } catch (error) {
         console.error('❌ 삭제 실패:', error);
         alert(`삭제에 실패했습니다: ${error.message}`);
         
-        // 실패 시 버튼 복원
-        deleteButton.disabled = false;
-        deleteButton.textContent = originalText;
-        deleteButton.style.opacity = '1';
-        
-        // 실패 시에도 서버에서 다시 데이터 불러오기
+        // 실패해도 데이터 새로고침
         await loadSubmissions();
     }
 }
-
         // 선택 관련 함수들
         function selectAllSubmissions() {
             const selectAll = document.getElementById('selectAll');
