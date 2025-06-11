@@ -660,40 +660,48 @@
         }
 
         // 데이터 불러오기 (Supabase)
-        async function loadSubmissions() {
-            if (!supabase) {
-                console.error('Supabase 연결 없음');
-                return;
-            }
+// 개선된 loadSubmissions 함수
+async function loadSubmissions() {
+    if (!supabase) {
+        console.error('Supabase 연결 없음');
+        return;
+    }
 
-            try {
-                const { data, error } = await supabase
-                    .from('submissions')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(100);
+    try {
+        const { data, error } = await supabase
+            .from('submissions')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-                if (error) throw error;
+        if (error) throw error;
 
-                submissions = data || [];
-                console.log('✅ 실시간 데이터 로드:', submissions.length, '개');
-                
-                if (document.getElementById('submissionsList')) {
-                    displaySubmissions();
-                }
-                
-                // 총 개수 업데이트
-                const totalElement = document.getElementById('totalCount');
-                if (totalElement) {
-                    totalElement.textContent = submissions.length;
-                }
-                
-            } catch (error) {
-                console.error('❌ 데이터 로드 실패:', error);
-                alert('데이터를 불러오는데 실패했습니다.');
-            }
+        submissions = data || [];
+        console.log('✅ 실시간 데이터 로드:', submissions.length, '개');
+        
+        if (document.getElementById('submissionsList')) {
+            displaySubmissions();
         }
-
+        
+        // 총 개수 업데이트
+        const totalElement = document.getElementById('totalCount');
+        if (totalElement) {
+            totalElement.textContent = submissions.length;
+        }
+        
+        // 선택 상태 초기화
+        const selectAllCheckbox = document.getElementById('selectAll');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+        }
+        updateSelectedCount();
+        
+    } catch (error) {
+        console.error('❌ 데이터 로드 실패:', error);
+        alert('데이터를 불러오는데 실패했습니다: ' + error.message);
+    }
+}
+        
         // 로딩 표시
         function showLoading() {
             document.getElementById('loadingOverlay').style.display = 'flex';
@@ -753,32 +761,52 @@
             displaySubmissions();
         }
 
-        // 데이터 삭제 (Supabase)
-        async function deleteSubmission(id) {
-            if (!confirm('정말 삭제하시겠습니까?')) {
-                return;
+// 데이터 삭제 (Supabase) - 수정된 버전
+async function deleteSubmission(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) {
+        return;
+    }
+
+    // 로딩 표시
+    const deleteButton = event.target;
+    const originalText = deleteButton.textContent;
+    deleteButton.disabled = true;
+    deleteButton.textContent = '삭제 중...';
+    deleteButton.style.opacity = '0.6';
+
+    try {
+        if (supabase) {
+            // Supabase에서 삭제
+            const { error } = await supabase
+                .from('submissions')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                throw new Error(`데이터베이스 삭제 실패: ${error.message}`);
             }
-
-            if (supabase) {
-                try {
-                    const { error } = await supabase
-                        .from('submissions')
-                        .delete()
-                        .eq('id', id);
-
-                    if (error) throw error;
-                    console.log('✅ 서버에서 삭제 완료:', id);
-                } catch (error) {
-                    console.error('❌ 서버 삭제 실패:', error);
-                    alert('서버에서 삭제하는데 실패했습니다.');
-                    return;
-                }
-            }
-
-            // 로컬 데이터에서도 삭제
-            submissions = submissions.filter(s => s.id.toString() !== id.toString());
-            displaySubmissions();
+            
+            console.log('✅ 서버에서 완전 삭제 완료:', id);
         }
+
+        // 삭제 후 서버에서 최신 데이터 다시 불러오기 (더 확실한 방법)
+        await loadSubmissions();
+        
+        console.log('✅ 삭제 완료 및 데이터 새로고침');
+        
+    } catch (error) {
+        console.error('❌ 삭제 실패:', error);
+        alert(`삭제에 실패했습니다: ${error.message}`);
+        
+        // 실패 시 버튼 복원
+        deleteButton.disabled = false;
+        deleteButton.textContent = originalText;
+        deleteButton.style.opacity = '1';
+        
+        // 실패 시에도 서버에서 다시 데이터 불러오기
+        await loadSubmissions();
+    }
+}
 
         // 선택 관련 함수들
         function selectAllSubmissions() {
